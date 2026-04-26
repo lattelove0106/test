@@ -23,33 +23,3 @@ echo -e "Configure the StorageClass as te default StorageClass."
 echo -e "Do not modify any existing Depoyments or PersistentVolumeClaims"
 echo ""
 echo -e "${BLUE}-------------------------------------------------------${NC}"
-echo -e "문제를 풀고 나서 Enter를 누르면 검증을 시작합니다..."
-read
-
-echo -e "${BLUE}=== [3] 결과 검증 (Validation) ===${NC}"
-
-# 1. StorageClass 생성 확인
-SC_CHECK=$(kubectl get sc local-kiddie --no-headers 2>/dev/null)
-if [[ "$SC_CHECK" == *"local-kiddie"* ]]; then
-    echo -e "1. StorageClass (local-kiddie): ${GREEN}PASS${NC}"
-else
-    echo -e "1. StorageClass (local-kiddie): ${RED}FAIL${NC}"
-fi
-
-# 2. Provisioner 및 BindingMode 확인
-PROVISIONER=$(kubectl get sc local-kiddie -o jsonpath='{.provisioner}' 2>/dev/null)
-BINDING_MODE=$(kubectl get sc local-kiddie -o jsonpath='{.volumeBindingMode}' 2>/dev/null)
-
-if [ "$PROVISIONER" == "rancher.io/local-path" ] && [ "$BINDING_MODE" == "WaitForFirstConsumer" ]; then
-    echo -e "2. Provisioner & BindingMode: ${GREEN}PASS${NC}"
-else
-    echo -e "2. Provisioner & BindingMode: ${RED}FAIL${NC}"
-fi
-
-# 3. Default 설정 확인
-IS_DEFAULT=$(kubectl get sc local-kiddie -o jsonpath='{.metadata.annotations.storageclass\.kubernetes\.io/is-default-class}' 2>/dev/null)
-if [ "$IS_DEFAULT" == "true" ]; then
-    echo -e "3. Default StorageClass: ${GREEN}PASS${NC}"
-else
-    echo -e "3. Default StorageClass: ${RED}FAIL${NC}"
-fi

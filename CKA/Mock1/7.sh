@@ -51,27 +51,3 @@ echo -e "   which should return 200:"
 echo -e "   curl -o /dev/null -s -w \"%{http_code}\\\\n\" http://example.org/echo"
 echo ""
 echo -e "${BLUE}-------------------------------------------------------${NC}"
-echo -e "문제를 풀고 나서 Enter를 누르면 검증을 시작합니다..."
-read
-
-echo -e "${BLUE}=== [3] 결과 검증 (Validation) ===${NC}"
-
-# 1. 서비스 생성 및 설정 확인 (포트 8080, NodePort)
-SVC_PORT=$(kubectl get svc echo-service -n echo-sound -o jsonpath='{.spec.ports[0].port}' 2>/dev/null)
-SVC_TYPE=$(kubectl get svc echo-service -n echo-sound -o jsonpath='{.spec.type}' 2>/dev/null)
-
-if [ "$SVC_PORT" == "8080" ] && [ "$SVC_TYPE" == "NodePort" ]; then
-    echo -e "1. Service (echo-service: 8080, NodePort): ${GREEN}PASS${NC}"
-else
-    echo -e "1. Service (echo-service): ${RED}FAIL (Port: $SVC_PORT, Type: $SVC_TYPE)${NC}"
-fi
-
-# 2. Ingress 리소스 생성 확인 (호스트 및 경로)
-ING_HOST=$(kubectl get ingress echo -n echo-sound -o jsonpath='{.spec.rules[0].host}' 2>/dev/null)
-ING_PATH=$(kubectl get ingress echo -n echo-sound -o jsonpath='{.spec.rules[0].http.paths[0].path}' 2>/dev/null)
-
-if [ "$ING_HOST" == "example.org" ] && [ "$ING_PATH" == "/echo" ]; then
-    echo -e "2. Ingress (echo: example.org/echo): ${GREEN}PASS${NC}"
-else
-    echo -e "2. Ingress (echo): ${RED}FAIL (Host: $ING_HOST, Path: $ING_PATH)${NC}"
-fi

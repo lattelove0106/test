@@ -26,27 +26,3 @@ echo -e "- Save the generated YAML manifest to /home/argo/argo-helm.yaml."
 echo ""
 echo -e "${BLUE}-------------------------------------------------------${NC}"
 echo -e "문제를 모두 풀었다면 Enter를 눌러 결과를 검증하세요..."
-read
-
-echo -e "${BLUE}=== [3] 결과 검증 (Validation) ===${NC}"
-
-# 1. 파일 생성 확인
-if [ -f "/home/argo/argo-helm.yaml" ]; then
-    echo -e "파일 생성 여부: ${GREEN}PASS${NC}"
-    
-    # 2. CRD 포함 여부 확인 (skip-crds 검증)
-    if ! grep -q "kind: CustomResourceDefinition" /home/argo/argo-helm.yaml; then
-        echo -e "CRD 제외 설정: ${GREEN}PASS${NC}"
-    else
-        echo -e "CRD 제외 설정: ${RED}FAIL (파일 내에 CRD가 포함됨)${NC}"
-    fi
-
-    # 3. 네임스페이스 설정 확인
-    if grep -q "namespace: argocd" /home/argo/argo-helm.yaml; then
-        echo -e "네임스페이스 설정: ${GREEN}PASS${NC}"
-    else
-        echo -e "네임스페이스 설정: ${RED}FAIL (argocd 네임스페이스 정보 없음)${NC}"
-    fi
-else
-    echo -e "파일 생성 여부: ${RED}FAIL (파일을 찾을 수 없음)${NC}"
-fi

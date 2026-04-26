@@ -55,34 +55,3 @@ echo ""
 echo -e "The new sidecar container has to run the following command: \"/bin/sh -c \"tail -f /var/log/wordpress.log\" use a volume mounted at /var/log to make the log file wordpress.log available to the co-located container"
 echo ""
 echo -e "${BLUE}-------------------------------------------------------${NC}"
-echo -e "문제를 풀고 나서 Enter를 누르면 검증을 시작합니다..."
-read
-
-echo -e "${BLUE}=== [3] 결과 검증 (Validation) ===${NC}"
-
-# Sidecar 컨테이너 이름 및 이미지 확인
-SIDECAR_IMG=$(kubectl get deployment wordpress -o jsonpath='{.spec.template.spec.containers[?(@.name=="sidecar")].image}')
-
-# 볼륨 마운트 경로 확인
-MOUNT_PATH=$(kubectl get deployment wordpress -o jsonpath='{.spec.template.spec.containers[?(@.name=="sidecar")].volumeMounts[?(@.mountPath=="/var/log")].mountPath}')
-
-# 실행 커맨드 확인
-COMMAND=$(kubectl get deployment wordpress -o jsonpath='{.spec.template.spec.containers[?(@.name=="sidecar")].command}')
-
-if [ "$SIDECAR_IMG" == "busybox:stable" ]; then
-    echo -e "1. Sidecar Container (busybox:stable): ${GREEN}PASS${NC}"
-else
-    echo -e "1. Sidecar Container (busybox:stable): ${RED}FAIL${NC}"
-fi
-
-if [ "$MOUNT_PATH" == "/var/log" ]; then
-    echo -e "2. Volume Mount (/var/log): ${GREEN}PASS${NC}"
-else
-    echo -e "2. Volume Mount (/var/log): ${RED}FAIL${NC}"
-fi
-
-if [[ "$COMMAND" == *"tail -f /var/log/wordpress.log"* ]]; then
-    echo -e "3. Sidecar Command: ${GREEN}PASS${NC}"
-else
-    echo -e "3. Sidecar Command: ${RED}FAIL${NC}"
-fi

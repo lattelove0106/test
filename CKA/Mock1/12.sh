@@ -77,38 +77,3 @@ echo -e "2. Edit the maria-deployment in the file located at 'maria_deploy.yaml'
 echo -e "3. Verify that the deployment is running and is stable."
 echo ""
 echo -e "${BLUE}-------------------------------------------------------${NC}"
-echo -e "문제를 풀고(PVC 생성 및 Deployment 적용) 나서 Enter를 누르면 검증을 시작합니다..."
-read
-
-echo -e "${BLUE}=== [3] 결과 검증 (Validation) ===${NC}"
-
-# 1. PVC 존재 여부 및 설정 확인
-PVC_STATUS=$(kubectl get pvc MariaDB -n mariadb -o jsonpath='{.status.phase}' 2>/dev/null)
-PVC_SIZE=$(kubectl get pvc MariaDB -n mariadb -o jsonpath='{.spec.resources.requests.storage}' 2>/dev/null)
-PVC_MODE=$(kubectl get pvc MariaDB -n mariadb -o jsonpath='{.spec.accessModes[0]}' 2>/dev/null)
-
-if [ "$PVC_STATUS" == "Bound" ] && [ "$PVC_SIZE" == "250Mi" ] && [ "$PVC_MODE" == "ReadWriteOnce" ]; then
-    echo -e "1. PVC 'MariaDB' Config & Bound: ${GREEN}PASS${NC}"
-else
-    echo -e "1. PVC 'MariaDB' Config & Bound: ${RED}FAIL (Status: $PVC_STATUS, Size: $PVC_SIZE, Mode: $PVC_MODE)${NC}"
-fi
-
-# 2. Deployment 배포 여부 및 PVC 연결 확인
-kubectl apply -f maria_deploy.yaml &> /dev/null
-DEPLOY_PVC=$(kubectl get deployment maria-deployment -n mariadb -o jsonpath='{.spec.template.spec.volumes[0].persistentVolumeClaim.claimName}' 2>/dev/null)
-
-if [ "$DEPLOY_PVC" == "MariaDB" ]; then
-    echo -e "2. Deployment Using PVC 'MariaDB': ${GREEN}PASS${NC}"
-else
-    echo -e "2. Deployment Using PVC 'MariaDB': ${RED}FAIL (연결된 PVC: $DEPLOY_PVC)${NC}"
-fi
-
-# 3. Pod 실행 상태 확인
-echo -e "Pod 상태 확인 중 (최대 30초 대기)..."
-kubectl wait --for=condition=Ready pod -l app=maria-deployment -n mariadb --timeout=30s &> /dev/null
-
-if [ $? -eq 0 ]; then
-    echo -e "3. Pod Stability: ${GREEN}PASS (Running and Stable)${NC}"
-else
-    echo -e "3. Pod Stability: ${RED}FAIL (Pod가 정상적으로 실행되지 않음)${NC}"
-fi

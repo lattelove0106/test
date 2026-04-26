@@ -54,34 +54,3 @@ echo -e "3. Configure the HPA to have a minimum of 1 pod and maximum of 4 pods."
 echo -e "   Also, we have to set the downscale stabilization window to 30 seconds."
 echo ""
 echo -e "${BLUE}-------------------------------------------------------${NC}"
-echo -e "문제를 풀고 나서 Enter를 누르면 검증을 시작합니다..."
-read
-
-echo -e "${BLUE}=== [3] 결과 검증 (Validation) ===${NC}"
-
-# 1. HPA 존재 여부 및 대상 확인
-TARGET=$(kubectl get hpa apache-server -n autoscale -o jsonpath='{.spec.scaleTargetRef.name}' 2>/dev/null)
-if [ "$TARGET" == "apache-deployment" ]; then
-    echo -e "1. HPA Target (apache-deployment): ${GREEN}PASS${NC}"
-else
-    echo -e "1. HPA Target: ${RED}FAIL (Target: $TARGET)${NC}"
-fi
-
-# 2. CPU 타겟 및 복제본 범위 확인 (Min/Max/CPU)
-MIN_PODS=$(kubectl get hpa apache-server -n autoscale -o jsonpath='{.spec.minReplicas}' 2>/dev/null)
-MAX_PODS=$(kubectl get hpa apache-server -n autoscale -o jsonpath='{.spec.maxReplicas}' 2>/dev/null)
-CPU_VAL=$(kubectl get hpa apache-server -n autoscale -o jsonpath='{.spec.metrics[0].resource.target.averageUtilization}' 2>/dev/null)
-
-if [ "$MIN_PODS" == "1" ] && [ "$MAX_PODS" == "4" ] && [ "$CPU_VAL" == "50" ]; then
-    echo -e "2. HPA Config (Min:1, Max:4, CPU:50%): ${GREEN}PASS${NC}"
-else
-    echo -e "2. HPA Config: ${RED}FAIL (Min:$MIN_PODS, Max:$MAX_PODS, CPU:$CPU_VAL)${NC}"
-fi
-
-# 3. Stabilization Window 확인
-STAB_WIN=$(kubectl get hpa apache-server -n autoscale -o jsonpath='{.spec.behavior.scaleDown.stabilizationWindowSeconds}' 2>/dev/null)
-if [ "$STAB_WIN" == "30" ]; then
-    echo -e "3. Downscale Stabilization (30s): ${GREEN}PASS${NC}"
-else
-    echo -e "3. Downscale Stabilization: ${RED}FAIL (현재값: ${STAB_WIN}s)${NC}"
-fi

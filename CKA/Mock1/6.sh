@@ -58,23 +58,3 @@ echo -e "1. Create a new Priority Class named high-priority for user workloads. 
 echo -e "2. Patch the existing Deployment busybox-logger in the priority namespace to use the newly created high-priority Priority Class"
 echo ""
 echo -e "${BLUE}-------------------------------------------------------${NC}"
-echo -e "문제를 풀고 나서 Enter를 누르면 검증을 시작합니다..."
-read
-
-echo -e "${BLUE}=== [3] 결과 검증 (Validation) ===${NC}"
-
-# 1. Priority Class 값 검증 (1000에서 1 적은 999인지 확인)
-PC_VALUE=$(kubectl get pc high-priority -o jsonpath='{.value}' 2>/dev/null)
-if [ "$PC_VALUE" == "999" ]; then
-    echo -e "1. Priority Class Value (999): ${GREEN}PASS${NC}"
-else
-    echo -e "1. Priority Class Value (999): ${RED}FAIL (현재값: $PC_VALUE)${NC}"
-fi
-
-# 2. Deployment에 Priority Class 적용 여부 검증
-PC_NAME=$(kubectl get deployment busybox-logger -n priority -o jsonpath='{.spec.template.spec.priorityClassName}' 2>/dev/null)
-if [ "$PC_NAME" == "high-priority" ]; then
-    echo -e "2. Deployment Priority Class Patch: ${GREEN}PASS${NC}"
-else
-    echo -e "2. Deployment Priority Class Patch: ${RED}FAIL (현재값: $PC_NAME)${NC}"
-fi

@@ -33,24 +33,3 @@ echo -e "3. Schedule a Pod on node01 adding the correct toleration to the spec a
 echo -e "   that it lands on the correct node."
 echo ""
 echo -e "${BLUE}-------------------------------------------------------${NC}"
-read -p "Press Enter after you complete the tasks to start validation..."
-
-echo -e "\n${BLUE}=== [3] Validation Result ===${NC}"
-
-# 1. Verify Node Taint
-TAINT_CHECK=$(kubectl describe node $NODE_NAME | grep -i "Taints:" | grep "IT=Kiddie:NoSchedule")
-if [ ! -z "$TAINT_CHECK" ]; then
-    echo -e "1. Node Taint (IT=Kiddie:NoSchedule): ${GREEN}PASS${NC}"
-else
-    echo -e "1. Node Taint (IT=Kiddie:NoSchedule): ${RED}FAIL${NC}"
-fi
-
-# 2. Verify Pod Placement with Toleration
-# Looking for a pod (excluding system pods) successfully scheduled on node01
-SCHEDULED_POD=$(kubectl get pods -A -o wide | grep $NODE_NAME | grep -v "kube-system" | grep "Running")
-if [ ! -z "$SCHEDULED_POD" ]; then
-    echo -e "2. Pod Placement on $NODE_NAME: ${GREEN}PASS${NC}"
-    echo -e "   Found Pod:\n$SCHEDULED_POD"
-else
-    echo -e "2. Pod Placement on $NODE_NAME: ${RED}FAIL${NC} (Ensure your pod has the correct toleration and is running on node01)"
-fi

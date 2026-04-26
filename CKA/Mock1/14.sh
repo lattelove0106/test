@@ -33,28 +33,3 @@ echo -e "CAUSE: kube-apiserver is pointing to etcd peer port 2380 instead of 237
 echo -e "TASK: Fix it."
 echo ""
 echo -e "${BLUE}-------------------------------------------------------${NC}"
-echo -e "문제를 해결(포트 수정)한 후 Enter를 누르면 검증을 시작합니다..."
-read
-
-echo -e "${BLUE}=== [3] 결과 검증 (Validation) ===${NC}"
-
-# 1. YAML 파일 내 포트 설정 확인
-CURRENT_PORT=$(grep "2380" $MANIFEST)
-if [ -z "$CURRENT_PORT" ]; then
-    echo -e "1. Manifest Port Correction: ${GREEN}PASS${NC} (2380 포트 설정이 제거됨)"
-else
-    echo -e "1. Manifest Port Correction: ${RED}FAIL${NC} (여전히 2380 포트가 남아있습니다)"
-fi
-
-# 2. API 서버 응답 확인 (실제 동작 여부)
-echo "API 서버 상태 확인 중 (최대 60초 대기)..."
-for i in {1..12}; do
-    kubectl get nodes &> /dev/null
-    if [ $? -eq 0 ]; then
-        echo -e "2. kube-apiserver Status: ${GREEN}PASS (Running)${NC}"
-        exit 0
-    fi
-    sleep 5
-done
-
-echo -e "2. kube-apiserver Status: ${RED}FAIL (서버가 여전히 응답하지 않습니다)${NC}"

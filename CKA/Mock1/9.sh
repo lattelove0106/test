@@ -73,24 +73,3 @@ echo -e "Create a network policy to have interaction between frontend and backen
 echo -e "The network policy has to be least permissive."
 echo ""
 echo -e "${BLUE}-------------------------------------------------------${NC}"
-echo -e "문제를 풀고 나서 Enter를 누르면 검증을 시작합니다..."
-read
-
-echo -e "${BLUE}=== [3] 결과 검증 (Validation) ===${NC}"
-
-# 네트워크 정책 존재 여부 및 설정 검증
-NP_NAME=$(kubectl get netpol -n backend -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-
-if [ ! -z "$NP_NAME" ]; then
-    echo -e "1. NetworkPolicy Created in 'backend' namespace: ${GREEN}PASS${NC} (Name: $NP_NAME)"
-    
-    # 최소 권한(포트 80 및 frontend 네임스페이스 허용) 여부 확인
-    ALLOW_PORT=$(kubectl get netpol "$NP_NAME" -n backend -o jsonpath='{.spec.ingress[0].ports[0].port}' 2>/dev/null)
-    if [ "$ALLOW_PORT" == "80" ]; then
-        echo -e "2. Least Permissive (Port 80 Restricted): ${GREEN}PASS${NC}"
-    else
-        echo -e "2. Least Permissive (Port 80 Restricted): ${RED}FAIL${NC}"
-    fi
-else
-    echo -e "1. NetworkPolicy Created: ${RED}FAIL (backend 네임스페이스에 정책이 없음)${NC}"
-fi

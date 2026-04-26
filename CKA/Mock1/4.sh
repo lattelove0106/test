@@ -52,37 +52,3 @@ echo -e "Ensure that both the init containers and main containers use exactly th
 echo -e "After making the changes, scale the Deployment back to 3 replicas."
 echo ""
 echo -e "${BLUE}-------------------------------------------------------${NC}"
-echo -e "문제를 풀고 나서 Enter를 누르면 검증을 시작합니다..."
-read
-
-echo -e "${BLUE}=== [3] 결과 검증 (Validation) ===${NC}"
-
-# 1. Replicas 확인
-REPLICAS=$(kubectl get deployment wordpress -o jsonpath='{.spec.replicas}')
-if [ "$REPLICAS" -eq 3 ]; then
-    echo -e "1. Replicas (3): ${GREEN}PASS${NC}"
-else
-    echo -e "1. Replicas (3): ${RED}FAIL (현재: $REPLICAS)${NC}"
-fi
-
-# 2. Main Container Resources 확인 (Requests == Limits)
-MAIN_REQ_CPU=$(kubectl get deployment wordpress -o jsonpath='{.spec.template.spec.containers[0].resources.requests.cpu}')
-MAIN_LIM_CPU=$(kubectl get deployment wordpress -o jsonpath='{.spec.template.spec.containers[0].resources.limits.cpu}')
-MAIN_REQ_MEM=$(kubectl get deployment wordpress -o jsonpath='{.spec.template.spec.containers[0].resources.requests.memory}')
-MAIN_LIM_MEM=$(kubectl get deployment wordpress -o jsonpath='{.spec.template.spec.containers[0].resources.limits.memory}')
-
-if [ ! -z "$MAIN_REQ_CPU" ] && [ "$MAIN_REQ_CPU" == "$MAIN_LIM_CPU" ] && [ "$MAIN_REQ_MEM" == "$MAIN_LIM_MEM" ]; then
-    echo -e "2. Main Container (Req == Lim): ${GREEN}PASS${NC}"
-else
-    echo -e "2. Main Container (Req == Lim): ${RED}FAIL${NC}"
-fi
-
-# 3. Init Container Resources 확인 (Main과 동일 여부)
-INIT_REQ_CPU=$(kubectl get deployment wordpress -o jsonpath='{.spec.template.spec.initContainers[0].resources.requests.cpu}')
-INIT_LIM_CPU=$(kubectl get deployment wordpress -o jsonpath='{.spec.template.spec.initContainers[0].resources.limits.cpu}')
-
-if [ ! -z "$INIT_REQ_CPU" ] && [ "$INIT_REQ_CPU" == "$MAIN_REQ_CPU" ] && [ "$INIT_REQ_CPU" == "$INIT_LIM_CPU" ]; then
-    echo -e "3. Init Container (Same as Main): ${GREEN}PASS${NC}"
-else
-    echo -e "3. Init Container (Same as Main): ${RED}FAIL${NC}"
-fi

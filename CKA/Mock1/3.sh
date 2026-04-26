@@ -107,33 +107,3 @@ echo -e "- Create an HTTPRoute resource named web-route with hostname gateway.we
 echo ""
 echo -e "Note: A GatewayClass named nginx-class is already installed in the cluster."
 echo -e "${BLUE}-------------------------------------------------------${NC}"
-echo -e "문제를 풀고 나서 Enter를 누르면 검증을 시작합니다..."
-read
-
-echo -e "${BLUE}=== [3] 결과 검증 (Validation) ===${NC}"
-
-# 1. Gateway 리소스 검증
-GW_CHECK=$(kubectl get gateway web-gateway -n web-app --no-headers 2>/dev/null)
-if [[ "$GW_CHECK" == *"web-gateway"* ]]; then
-    GW_TLS=$(kubectl get gateway web-gateway -n web-app -o jsonpath='{.spec.listeners[0].tls.certificateRefs[0].name}')
-    if [ "$GW_TLS" == "web-tls" ]; then
-        echo -e "1. Gateway Resource (web-gateway & TLS): ${GREEN}PASS${NC}"
-    else
-        echo -e "1. Gateway Resource (web-gateway): ${GREEN}PASS${NC} / TLS Secret: ${RED}FAIL${NC}"
-    fi
-else
-    echo -e "1. Gateway Resource (web-gateway): ${RED}FAIL${NC}"
-fi
-
-# 2. HTTPRoute 리소스 검증
-ROUTE_CHECK=$(kubectl get httproute web-route -n web-app --no-headers 2>/dev/null)
-if [[ "$ROUTE_CHECK" == *"web-route"* ]]; then
-    ROUTE_HOST=$(kubectl get httproute web-route -n web-app -o jsonpath='{.spec.hostnames[0]}')
-    if [ "$ROUTE_HOST" == "gateway.web.k8s.local" ]; then
-        echo -e "2. HTTPRoute Resource (web-route & Hostname): ${GREEN}PASS${NC}"
-    else
-        echo -e "2. HTTPRoute Resource (web-route): ${GREEN}PASS${NC} / Hostname: ${RED}FAIL${NC}"
-    fi
-else
-    echo -e "2. HTTPRoute Resource (web-route): ${RED}FAIL${NC}"
-fi
