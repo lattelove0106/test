@@ -9,7 +9,7 @@ NC='\033[0m'
 echo -e "${BLUE}=== [1] 환경 준비 (Setup) ===${NC}"
 
 # 1. 시뮬레이션을 위한 데비안 패키지 파일 생성
-touch ~/cri-dockerd_0.3.9.3-0.ubuntu-jammy_amd64.deb
+wget https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.9/cri-dockerd_0.3.9.3-0.ubuntu-jammy_amd64.deb
 
 # 2. 기존 설정 초기화 (실습을 위해 0으로 설정)
 sudo sysctl -w net.bridge.bridge-nf-call-iptables=0 &> /dev/null
