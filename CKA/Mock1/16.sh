@@ -39,7 +39,7 @@ echo -e "${GREEN}Setup Completed: 'nodeport-deployment' is running in 'relative'
 echo ""
 
 echo -e "${BLUE}=== [2] QUESTION: #16 NodePort ===${NC}"
-echo -e "Ther is a deployment named nodeport-deployment in the relative namespace.
+echo -e "Ther is a deployment named nodeport-deployment in the relative namespace."
 echo -e "Tasks:"
 echo -e "1. Configure the deployment so it can be exposed using port 80 and protocol TCP name http."
 echo -e "2. Create a new Service named nodeport-service exposing the container port 80 and TCP."
