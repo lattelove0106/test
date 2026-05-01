@@ -16,7 +16,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
-  name: high-priority
+  name: high-priority-2
 value: 1000
 globalDefault: false
 description: "사용자 정의 우선순위 클래스 중 가장 높은 클래스"
